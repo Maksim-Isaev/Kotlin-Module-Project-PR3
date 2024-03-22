@@ -1,50 +1,45 @@
 import java.util.Scanner
-class Archive (var notes: MutableMap<String, String> = mutableMapOf()) {
-    fun notesRun() {
-        while (true) {
-            val command = if (notes.isEmpty()) "создать заметку" else "создать заметку, выбрать заметку"
-            println("Напишите \"$command\" для соответствующих действий или \"назад\" для возврата.")
-            val choice = Values.scan.nextLine().lowercase().trim()
+class Archive {
+    var notes: MutableMap<String, String> = mutableMapOf()
 
-            when (choice) {
-                "создать заметку" -> createNote()
-                "выбрать заметку" -> if (notes.isNotEmpty()) selectNote() else println("Сначала создайте заметку.")
-                "назад" -> break
-                else -> println("Неверная команда. Попробуйте ещё раз.")
+    fun notesRun() { // Меню создания заметки
+        val options = listOf("Создать заметку", "Выбрать заметку", "Назад")
+        while (true) {
+            val selectedOption = getUserChoice("Выберите действие:", options)
+            when (selectedOption) {
+                0 -> createNote()
+                1 -> if (notes.isNotEmpty()) selectNote() else println("Сначала создайте заметку.")
+                2 -> return
             }
         }
     }
 
     private fun createNote() {
         println("Укажите название заметки:")
-        val title = Values.scan.nextLine().trim()
-        if (title.isEmpty()) {
-            println("Название не должно быть пустым.")
-            return
-        }
+        val title = readLine().orEmpty().trim()
         println("Укажите текст заметки:")
-        val text = Values.scan.nextLine().trim()
-        if (text.isEmpty()) {
-            println("Текст не должен быть пустым.")
-            return
+        val text = readLine().orEmpty().trim()
+        if (title.isNotEmpty() && text.isNotEmpty()) {
+            notes[title] = text
+            println("Заметка \"$title\" создана.")
+        } else {
+            println("Название и текст не должны быть пустыми.")
         }
-        notes[title] = text
-        println("Заметка \"$title\" создана.")
     }
 
-    private fun selectNote() {
-        println("Доступные заметки: ${notes.keys.joinToString(", ")}")
-        val title = Values.scan.nextLine().trim()
-        val note = notes[title]
-        if (note != null) {
-            println("Текст заметки \"$title\": $note")
-        } else {
-            println("Заметка с названием \"$title\" не найдена.")
+    private fun selectNote() { // Выбор заметки
+        val noteTitles = notes.keys.toList() + "Назад"
+        val selectedNote = getUserChoice("Выберите заметку или вернитесь назад:", noteTitles)
+        if (selectedNote == noteTitles.lastIndex) {
+            return
         }
+        val title = noteTitles[selectedNote]
+        println("Текст заметки \"$title\": ${notes[title]}") // Просмотр заметки
     }
 }
 
-    object Values {
-        val scan = Scanner(System.`in`)
-        val mainArr = mutableMapOf<String, Archive>()
-    }
+object Values {
+
+    val mainArr = mutableMapOf<String, Archive>()
+}
+
